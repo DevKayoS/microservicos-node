@@ -12,8 +12,16 @@
   "description": "",
   "dependencies": {
     "@fastify/cors": "^11.0.1",
+    "@types/node": "^22.15.29",
+    "drizzle-kit": "^0.31.1",
+    "drizzle-orm": "^0.44.2",
     "fastify": "^5.3.3",
     "fastify-type-provider-zod": "^4.0.2",
+    "pg": "^8.16.0",
+    "typescript": "^5.8.3",
     "zod": "^3.25.50"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.2"
   }
 }

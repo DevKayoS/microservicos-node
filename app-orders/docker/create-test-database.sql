@@ -1,0 +1,1 @@
+CREATE TABLE orders_tests;

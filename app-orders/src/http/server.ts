@@ -13,7 +13,7 @@ const app = fastify().withTypeProvider<ZodTypeProvider>()
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
 
-app.get('/helth', () => {
+app.get('/health', () => {
     return 'ok'
 })
 
