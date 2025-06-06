@@ -6,10 +6,10 @@ import {
     serializerCompiler,
     type ZodTypeProvider
 } from 'fastify-type-provider-zod'
-import { channels } from '../broker/channels/index.ts'
 import { db } from '../db/client.ts'
 import { schema } from '../db/schema/index.ts'
 import { randomUUID } from 'node:crypto'
+import { dispatchOrderCreated } from '../broker/messages/order-created.ts'
 
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
@@ -33,17 +33,25 @@ app.post('/orders', {
     }, async (request, reply) => {
         const { amount } = request.body
 
-        console.log("oq eu fiz de errado ", amount)
-
-        channels.orders.sendToQueue('orders', Buffer.from(JSON.stringify(amount)))
-
+        const orderId = randomUUID()
         await db.insert(schema.orders).values({
-            id: randomUUID(),
+            id: orderId,
             amount,
-            customerId: '1'
+            customerId: 'bc26e22f-2e7b-487b-b826-812cbd244b80'
         })
 
-        return reply.status(201).send()
+        dispatchOrderCreated({
+            amount,
+            orderId,
+            customer:{
+                id: 'bc26e22f-2e7b-487b-b826-812cbd244b80'
+            }
+        })
+
+        return reply.status(201).send({
+            status: true,
+            msg: 'Order has created with successfully'
+        })
     }
 )
 
