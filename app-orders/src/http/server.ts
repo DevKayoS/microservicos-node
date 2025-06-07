@@ -1,4 +1,5 @@
 import '@opentelemetry/auto-instrumentations-node/register'
+import { trace } from '@opentelemetry/api'
 
 import { fastify } from 'fastify'
 import { fastifyCors } from '@fastify/cors'
@@ -11,7 +12,9 @@ import {
 import { db } from '../db/client.ts'
 import { schema } from '../db/schema/index.ts'
 import { randomUUID } from 'node:crypto'
+import { setTimeout } from 'node:timers/promises'
 import { dispatchOrderCreated } from '../broker/messages/order-created.ts'
+import { tracer } from '../tracer/tracer.ts'
 
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
@@ -33,6 +36,8 @@ app.post('/orders', {
         })
     }
     }, async (request, reply) => {
+        const span = tracer.startSpan('Request Order')
+
         const { amount } = request.body
 
         const orderId = randomUUID()
@@ -42,6 +47,14 @@ app.post('/orders', {
             customerId: 'bc26e22f-2e7b-487b-b826-812cbd244b80'
         })
 
+       span.setAttribute('order', JSON.stringify({
+            order_id: orderId.toString(),
+            amount,
+            customerId: 'bc26e22f-2e7b-487b-b826-812cbd244b80'
+        }))
+
+        span.setAttribute('Channel', 'send to orders channel')
+
         dispatchOrderCreated({
             amount,
             orderId,
@@ -49,6 +62,8 @@ app.post('/orders', {
                 id: 'bc26e22f-2e7b-487b-b826-812cbd244b80'
             }
         })
+
+        span.end()
 
         return reply.status(201).send({
             status: true,
