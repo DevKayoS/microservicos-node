@@ -29,7 +29,7 @@ app.get('/health', () => {
 })
 
 
-app.post('/orders', {
+app.post('/create', {
     schema: {
         body: z.object({
             amount: z.number()
