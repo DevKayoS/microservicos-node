@@ -1,6 +1,6 @@
 import * as awsx from "@pulumi/awsx";
 import { cluster } from '../cluster'
-import { appLoadBalancer } from "../load-balancer";
+import { appLoadBalancer, networLoadBalancer } from "../load-balancer";
 
 
 const rabbitmqAdminTargetGroup = appLoadBalancer.createTargetGroup('rabbitmq-admin-target', {
@@ -12,10 +12,27 @@ const rabbitmqAdminTargetGroup = appLoadBalancer.createTargetGroup('rabbitmq-adm
     }
 })
 
-const rabbitmqAdminHttpListener = appLoadBalancer.createListener('rabbitmq-admin-listener', {
+export const rabbitmqAdminHttpListener = appLoadBalancer.createListener('rabbitmq-admin-listener', {
     port: 15672,
     protocol: 'HTTP',
     targetGroup: rabbitmqAdminTargetGroup
+})
+
+
+const amqpTargetGroup = networLoadBalancer.createTargetGroup('amqp-target', {
+    protocol: 'TCP',
+    port: 5672,
+    targetType: 'ip',
+    healthCheck: {
+        protocol: 'TCP',
+        port: '5672',
+    }
+})
+
+export const amqpListener = networLoadBalancer.createListener('amqp-listener', {
+    port: 5672,
+    protocol: 'TCP',
+    targetGroup: amqpTargetGroup
 })
 
 export const rabbitMQService = new awsx.classic.ecs.FargateService('fargate-rabbitmq', {
@@ -28,7 +45,8 @@ export const rabbitMQService = new awsx.classic.ecs.FargateService('fargate-rabb
             cpu: 256,
             memory: 512,
             portMappings: [ 
-                rabbitmqAdminHttpListener
+                rabbitmqAdminHttpListener,
+                amqpListener
             ],
             environment: [
                 { name: 'RABBITMQ_DEFAULT_USER', value: 'admin' },

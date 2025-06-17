@@ -6,4 +6,4 @@ import { rabbitMQService } from './src/services/rabbitmq'
 
 export const ordersId = ordersService.service.id
 export const rabbitmqId = rabbitMQService.service.id
-export const rabbitMQAdminUrl = pulumi.interpolate`http://${appLoadBalancer.listeners[0].endpoint}:15672`
+export const rabbitMQAdminUrl = pulumi.interpolate`http://${appLoadBalancer.listeners[0].endpoint.hostname}:15672`
