@@ -5,7 +5,6 @@ import { cluster } from '../cluster'
 import { amqpListener } from "./rabbitmq";
 import { appLoadBalancer } from "../load-balancer";
 
-
 const ordersTargetGroup = appLoadBalancer.createTargetGroup('orders-target', {
     port: 3333,
     protocol: 'HTTP',
